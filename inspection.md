@@ -7,9 +7,9 @@ Keep the backticks but remove the `${}`, so `${ITEM}` becomes `My Answer`.
 Unless otherwise specified, list the command and all arguments that you passed to it.
 
 ## Repository Configuration
-1. The `crazy_turtle` git repository consists of the ROS 2 packages `${pkg_name1}` and `${pkg_name2}`.
-2. The package `${pkg_name1}` is a `${build type of package}` package.
-2. The package `${pkg_name2}` is a `${build type of package}` package.
+1. The `crazy_turtle` git repository consists of the ROS 2 packages `crazy_turtle` and `crazy_turtle_interfaces`.
+2. The package `crazy_turtle` is a `ament_python` package.
+2. The package `crazy_turtle_interfaces` is a `ament_cmake` package.
 
 
 ## Setup Instructions
