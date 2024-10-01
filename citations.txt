@@ -1,0 +1,2 @@
+Worked With: 
+[1] M. Elwin, "GitHub - m-elwin/me495_demo: Demonstration code for ME495 Embedded Systems in Robotics", Github, Available: https://github.com/m-elwin/me495_demo. [Accessed 29 September. 2024].
