@@ -13,13 +13,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='lbos7',
+    maintainer='Logan Boswell',
     maintainer_email='loganstuartboswell@gmail.com',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    description='A ROS 2 package for controlling a turtle in turtlesim',
+    license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'waypoint = turtle_control.waypoint:main'
         ],
     },
 )
