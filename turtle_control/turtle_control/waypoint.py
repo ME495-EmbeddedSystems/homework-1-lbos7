@@ -33,11 +33,19 @@ class Waypoint(Node):
         self.reset_client = self.create_client(Empty, 'reset', callback_group=cb_group)
         self.teleport_abs_client = self.create_client(TeleportAbsolute, 'teleport_absolute', callback_group=cb_group)
         self.teleport_rel_client = self.create_client(TeleportRelative, 'teleport_relative', callback_group=cb_group)
-        # self.pose = self.create_subscription(Pose, 'pose', self.pose_callback, 10)
+        self.pose_sub = self.create_subscription(Pose, 'pose', self.pose_callback, 10)
+        self.vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
         self.state = State.STOPPED
         self.first_log_for_stop = True
-        self.pen_state = 1
-        self.pose = 0
+        self.pose = []
+        self.waypoints = []
+        self.current_waypoint_ind = 1
+        self.waypoints_forward = True
+        self.distance_error = 0.0
+        self.angle_error = 0.0
+        self.dist_thresh = .05
+        self.lin_gain = 2.5
+        self.angle_gain = 7.5
 
 
     def timer_callback(self):
@@ -45,9 +53,27 @@ class Waypoint(Node):
             if self.first_log_for_stop:
                 self.get_logger().info('Stopping.')
                 self.first_log_for_stop = False
+            self.vel_pub.publish(Twist(linear=Vector3(x=0.0), angular=Vector3(z=0.0)))
         elif self.state == State.MOVING:
             self.get_logger().debug('Issuing Command!')
-        
+            if len(self.waypoints) > 0:
+                target = self.waypoints[self.current_waypoint_ind]
+                self.distance_error = math.dist([target.x, target.y], [self.pose.x, self.pose.y])
+                self.angle_error = math.atan2(target.y - self.pose.y, target.x - self.pose.x) - self.pose.theta
+                self.vel_pub.publish(Twist(linear=Vector3(x=self.lin_gain*self.distance_error), angular=Vector3(z=self.angle_gain*self.angle_error)))
+                if self.distance_error < self.dist_thresh:
+                    if self.current_waypoint_ind == (len(self.waypoints) - 1):
+                        self.current_waypoint_ind -= 1
+                        self.waypoints_forward = False
+                    elif self.current_waypoint_ind == 0:
+                        self.current_waypoint_ind += 1
+                        self.waypoints_forward = True
+                    elif self.waypoints_forward:
+                        self.current_waypoint_ind += 1
+                    else:
+                        self.current_waypoint_ind -= 1
+
+                
     def toggle_callback(self, request, response):
         if self.state == State.STOPPED:
             self.state = State.MOVING
@@ -62,6 +88,7 @@ class Waypoint(Node):
 
 
     async def load_callback(self, request, response):
+        self.waypoints = request.waypoints
         await self.reset_client.call_async(Empty.Request())
         is_first_point = True
         first_point = {}
@@ -106,31 +133,9 @@ class Waypoint(Node):
             await self.teleport_rel_client.call_async(TeleportRelative.Request(
                 linear=.4, angular=math.pi))
             
-
-    # def draw_x(self, point):
-    #     self.path_client.call_async(SetPen.Request(r=255, g=0, b=0,
-    #                                                    width=3, off=0))
-    #     self.teleport_abs_client.call_async(TeleportAbsolute.Request(
-    #         x=point.x, y=point.y, theta=0.0))
-    #     self.get_logger().error('center of point')
-    #     self.teleport_rel_client.call_async(TeleportRelative.Request(
-    #         linear=.2, angular=math.pi/4))
-    #     self.teleport_rel_client.call_async(TeleportRelative.Request(
-    #         linear=.4, angular=math.pi))
-    #     self.teleport_abs_client.call_async(TeleportAbsolute.Request(
-    #         x=point.x, y=point.y, theta=math.pi))
-    #     self.teleport_rel_client.call_async(TeleportRelative.Request(
-    #         linear=.2, angular=-math.pi/4))
-    #     self.teleport_rel_client.call_async(TeleportRelative.Request(
-    #         linear=.4, angular=math.pi))
-    #     self.path_client.call_async(SetPen.Request(r=255, g=255, b=255,
-    #                                                    width=3, off=1))
-
-
     def pose_callback(self, pose):
         self.pose = pose
 
-        
 
 def main(args=None):
     """Entrypoint for the waypoint ROS node."""
