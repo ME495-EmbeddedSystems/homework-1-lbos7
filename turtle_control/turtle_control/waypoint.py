@@ -44,8 +44,9 @@ class Waypoint(Node):
         self.distance_error = 0.0
         self.angle_error = 0.0
         self.dist_thresh = .05
-        self.lin_gain = 2
-        self.angle_gain = 7.5
+        self.lin_gain = 1.5
+        self.angle_gain = 8
+        self.minimum_vel = 3.0
 
 
     def timer_callback(self):
@@ -64,8 +65,7 @@ class Waypoint(Node):
                     self.angle_error = self.angle_error - 2*math.pi
                 elif self.angle_error < -math.pi:
                     self.angle_error = 2*math.pi + self.angle_error
-
-                self.vel_pub.publish(Twist(linear=Vector3(x=self.lin_gain*self.distance_error), angular=Vector3(z=self.angle_gain*self.angle_error)))
+                self.vel_pub.publish(Twist(linear=Vector3(x=max(self.lin_gain*self.distance_error, self.minimum_vel)), angular=Vector3(z=self.angle_gain*self.angle_error)))
                 if self.distance_error < self.dist_thresh:
                     if self.current_waypoint_ind == (len(self.waypoints) - 1):
                         self.current_waypoint_ind -= 1
