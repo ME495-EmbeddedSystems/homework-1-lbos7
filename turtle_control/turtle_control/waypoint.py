@@ -94,6 +94,7 @@ class Waypoint(Node):
 
     async def load_callback(self, request, response):
         self.waypoints = request.waypoints
+        self.current_waypoint_ind = 0
         await self.reset_client.call_async(Empty.Request())
         is_first_point = True
         first_point = {}
@@ -114,8 +115,9 @@ class Waypoint(Node):
                                                         width=3, off=1))
             await self.teleport_abs_client.call_async(TeleportAbsolute.Request(
                 x=first_point.x, y=first_point.y, theta=0.0))
-        else:
+        if self.state == State.MOVING:
             self.state = State.STOPPED
+            self.first_log_for_stop = True
         return response
         
     
