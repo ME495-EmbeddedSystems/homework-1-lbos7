@@ -8,6 +8,7 @@ from turtlesim.srv import SetPen, TeleportAbsolute, TeleportRelative
 from turtlesim.msg import Pose
 from geometry_msgs.msg import Twist, Vector3
 from turtle_interfaces.srv import Waypoints
+from turtle_interfaces.msg import ErrorMetric
 from enum import Enum, auto
 import math
 
@@ -35,9 +36,11 @@ class Waypoint(Node):
         self.teleport_rel_client = self.create_client(TeleportRelative, 'teleport_relative', callback_group=cb_group)
         self.pose_sub = self.create_subscription(Pose, 'pose', self.pose_callback, 10)
         self.vel_pub = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.error_pub = self.create_publisher(ErrorMetric, 'loop_metrics', 10)
         self.state = State.STOPPED
         self.first_log_for_stop = True
         self.pose = []
+        self.prev_pose = []
         self.waypoints = []
         self.current_waypoint_ind = 1
         self.waypoints_forward = True
@@ -47,6 +50,10 @@ class Waypoint(Node):
         self.lin_gain = 1.5
         self.angle_gain = 8
         self.minimum_vel = 3.0
+        self.complete_loops = 0
+        self.actual_distance = 0.0
+        self.sl_dist = 0.0
+        self.error = 0.0
 
 
     def timer_callback(self):
@@ -72,6 +79,9 @@ class Waypoint(Node):
                         self.waypoints_forward = False
                     elif self.current_waypoint_ind == 0:
                         self.current_waypoint_ind += 1
+                        self.complete_loops += 1
+                        self.error = self.actual_distance - self.sl_dist
+                        self.error_pub.publish(ErrorMetric(complete_loops=self.complete_loops, actual_distance=self.actual_distance, error=self.error))
                         self.waypoints_forward = True
                     elif self.waypoints_forward:
                         self.current_waypoint_ind += 1
@@ -94,7 +104,11 @@ class Waypoint(Node):
 
     async def load_callback(self, request, response):
         self.waypoints = request.waypoints
-        self.current_waypoint_ind = 0
+        self.current_waypoint_ind = 1
+        self.complete_loops = 0
+        self.actual_distance = 0.0
+        self.error = 0.0
+        self.error_pub.publish(ErrorMetric(complete_loops=self.complete_loops, actual_distance=self.actual_distance, error=self.error))
         await self.reset_client.call_async(Empty.Request())
         is_first_point = True
         first_point = {}
@@ -118,6 +132,7 @@ class Waypoint(Node):
         if self.state == State.MOVING:
             self.state = State.STOPPED
             self.first_log_for_stop = True
+        self.sl_dist = response.distance
         return response
         
     
@@ -141,7 +156,11 @@ class Waypoint(Node):
                 linear=.4, angular=math.pi))
             
     def pose_callback(self, pose):
+        self.prev_pose = self.pose
         self.pose = pose
+        if type(self.pose) == type(self.prev_pose):
+            self.actual_distance += math.dist([self.pose.x, self.pose.y],
+                                            [self.prev_pose.x, self.prev_pose.y])
 
 
 def main(args=None):
