@@ -1,0 +1,18 @@
+<!-- Launch a turtlesim and waypoint node-->
+<launch>
+  <arg name="frequency" default="100.0" description="Frequency of Timer Callbacks"/>
+  <arg name="tolerance" default=".05" description="Tolerance for Getting Close to Waypoints"/>
+  <node pkg="turtlesim" exec="turtlesim_node">
+    <param from="$(find-pkg-share turtle_control)/config/colors.yaml"/>
+  </node>
+  <node pkg="turtle_control" exec="waypoint">
+    <remap from="cmd_vel" to="turtle1/cmd_vel"/>
+    <remap from="set_pen" to="turtle1/set_pen"/>
+    <remap from="teleport_absolute" to="turtle1/teleport_absolute"/>
+    <remap from="teleport_relative" to="turtle1/teleport_relative"/>
+    <remap from="reset" to="reset"/>
+    <remap from="pose" to="turtle1/pose"/>
+    <param name="frequency" value="$(var frequency)"/>
+    <param name="tolerance" value="$(var tolerance)"/>
+  </node>
+</launch>

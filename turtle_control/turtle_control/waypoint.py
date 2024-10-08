@@ -25,8 +25,10 @@ class Waypoint(Node):
         super().__init__('waypoint')
         cb_group = MutuallyExclusiveCallbackGroup()
         self.get_logger().info('Waypoint')
-        self.declare_parameter('frequency', 90)
+        self.declare_parameter('frequency', 90.0)
+        self.declare_parameter('tolerance', .05)
         self.freq = self.get_parameter('frequency').value
+        self.tolerance = self.get_parameter('tolerance').value
         self.tmr = self.create_timer(1/self.freq, self.timer_callback)
         self.toggle = self.create_service(Empty, 'toggle', self.toggle_callback)
         self.load = self.create_service(Waypoints, 'load', self.load_callback)
@@ -46,7 +48,6 @@ class Waypoint(Node):
         self.waypoints_forward = True
         self.distance_error = 0.0
         self.angle_error = 0.0
-        self.dist_thresh = .05
         self.lin_gain = 1.5
         self.angle_gain = 8
         self.minimum_vel = 3.0
@@ -73,7 +74,7 @@ class Waypoint(Node):
                 elif self.angle_error < -math.pi:
                     self.angle_error = 2*math.pi + self.angle_error
                 self.vel_pub.publish(Twist(linear=Vector3(x=max(self.lin_gain*self.distance_error, self.minimum_vel)), angular=Vector3(z=self.angle_gain*self.angle_error)))
-                if self.distance_error < self.dist_thresh:
+                if self.distance_error < self.tolerance:
                     if self.current_waypoint_ind == (len(self.waypoints) - 1):
                         self.current_waypoint_ind -= 1
                         self.waypoints_forward = False
@@ -138,11 +139,11 @@ class Waypoint(Node):
     
     async def draw_x(self, points):
         for point in points:
-            self.path_client.call_async(SetPen.Request(r=255, g=0, b=0,
+            self.path_client.call_async(SetPen.Request(r=0, g=0, b=0,
                                                         width=3, off=1))
             await self.teleport_abs_client.call_async(TeleportAbsolute.Request(
                 x=point.x, y=point.y, theta=0.0))
-            self.path_client.call_async(SetPen.Request(r=255, g=0, b=0,
+            self.path_client.call_async(SetPen.Request(r=0, g=0, b=0,
                                                         width=3, off=0))
             await self.teleport_rel_client.call_async(TeleportRelative.Request(
                 linear=.2, angular=math.pi/4))
