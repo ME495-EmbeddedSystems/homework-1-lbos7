@@ -5,4 +5,4 @@ Author: Logan Boswell
 3. The `ros2 service call /toggle std_srvs/srv/Empty` starts and stops the turtle.
 4. Here is a video of the turtle in action.
     Video:
-    ![Video] (https://github.com/ME495-EmbeddedSystems/homework-1-lbos7/issues/1)
+    ![Video] (https://github.com/ME495-EmbeddedSystems/homework-1-lbos7/issues/1#issue-2571908963)
