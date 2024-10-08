@@ -175,7 +175,8 @@ class Waypoint(Node):
         loads waypoints, and draws an X at each waypoint
 
             Args:
-                request (Waypoints_Request) : a list of point dictionaries
+                request (Waypoints_Request) : the waypoint field contains a list
+                of point dictionaries with x, y, and z components
 
             Returns:
                 response (Waypoints_Response) : the straight-line distance
