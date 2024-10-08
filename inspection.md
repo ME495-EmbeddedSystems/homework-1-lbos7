@@ -14,7 +14,7 @@ Unless otherwise specified, list the command and all arguments that you passed t
 
 ## Setup Instructions
 1. Build the workspace using `colcon build --symlink-install` so that it is unnecessary to rebuild when python files change.
-2. Initialize the ROS environment (i.e., set the necessary ROS environment variables) by executing `source /opt/ros/jazzy/setup.bash`
+2. Initialize the ROS environment (i.e., set the necessary ROS environment variables) by executing `source /opt/ros/jazzy/setup.bash and source install/setup.bash`
 3. Make sure no other ROS nodes are running prior to starting by inspecting the results of `ros2 node list`.
 3. Run the launchfile `go_crazy_turtle.launch.xml` by executing `ros2 launch crazy_turtle go_crazy_turtle.launch.xml`
 4. When running you can see a visual depiction of the ROS graph using the `rqt_graph` command.

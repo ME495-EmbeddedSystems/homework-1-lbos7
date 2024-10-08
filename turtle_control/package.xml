@@ -5,7 +5,7 @@
   <version>1.0.0</version>
   <description>A ROS 2 package for controlling a turtle in turtlesim</description>
   <maintainer email="loganstuartboswell@gmail.com">Logan Boswell</maintainer>
-  <license>MIT</license>
+  <license>GPLv3</license>
 
   <exec_depend>rclpy</exec_depend>
   <exec_depend>turtlesim</exec_depend>

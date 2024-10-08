@@ -48,7 +48,7 @@ class Waypoint(Node):
         self.waypoints_forward = True
         self.distance_error = 0.0
         self.angle_error = 0.0
-        self.lin_gain = 1.5
+        self.lin_gain = 1
         self.angle_gain = 8
         self.minimum_vel = 3.0
         self.complete_loops = 0
@@ -81,7 +81,7 @@ class Waypoint(Node):
                     elif self.current_waypoint_ind == 0:
                         self.current_waypoint_ind += 1
                         self.complete_loops += 1
-                        self.error = self.actual_distance - self.sl_dist
+                        self.error = self.actual_distance - 2*self.complete_loops*self.sl_dist
                         self.error_pub.publish(ErrorMetric(complete_loops=self.complete_loops, actual_distance=self.actual_distance, error=self.error))
                         self.waypoints_forward = True
                     elif self.waypoints_forward:
