@@ -1,0 +1,4 @@
+inspection.md: A-
+It seems like the turtle goes backwards through the waypoints when getting to the end instead of continuing in a loop. Code in waypoint.py is well structured and commented appropriately.
+
+Overall A

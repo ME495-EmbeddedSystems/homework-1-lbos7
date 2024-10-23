@@ -14,7 +14,7 @@ Unless otherwise specified, list the command and all arguments that you passed t
 
 ## Setup Instructions
 1. Build the workspace using `colcon build --symlink-install` so that it is unnecessary to rebuild when python files change.
-2. Initialize the ROS environment (i.e., set the necessary ROS environment variables) by executing `source /opt/ros/jazzy/setup.bash and source install/setup.bash`
+2. Initialize the ROS environment (i.e., set the necessary ROS environment variables) by executing `source /opt/ros/jazzy/setup.bash and source install/setup.bash` [only the latter is needed if the former was sourced when you ran colcon build for the first time]
 3. Make sure no other ROS nodes are running prior to starting by inspecting the results of `ros2 node list`.
 3. Run the launchfile `go_crazy_turtle.launch.xml` by executing `ros2 launch crazy_turtle go_crazy_turtle.launch.xml`
 4. When running you can see a visual depiction of the ROS graph using the `rqt_graph` command.
@@ -93,22 +93,21 @@ If the nodes launched from the `launchfile` are not running, you will get incorr
 
 11. Use the ROS command `ros2 param describe /mover velocity` to get information about the `/mover` `velocity` parameter, including its type, description, and constraints
    ```
+    Parameter name: velocity
    Type: double
    Description: The velocity of the turtle
    Constraints:
    ```
 
-12. Use the ROS command `ros2 interface show crazy_turtle_interfaces/srv/Switch` to retrieve a template/prototype for entering parameters for the `/switch` service on the command line.
+12. Use the ROS command `ros2 interface proto crazy_turtle_interfaces/srv/Switch` to retrieve a template/prototype for entering parameters for the `/switch` service on the command line.
    ```
-   turtlesim/Pose mixer # use a strange formula to set the new location of the turtle
-      float32 x
-      float32 y
-      float32 theta
-      float32 linear_velocity
-      float32 angular_velocity
-   ---
-   float64 x # the new x position of the new turtle
-   float64 y # the new y position of the new
+    "mixer:
+       x: 0.0
+       y: 0.0
+     theta: 0.0
+       linear_velocity: 0.0
+       angular_velocity: 0.0
+    "
    ```
 
 ## Package Exploration
@@ -136,7 +135,7 @@ If the nodes launched from the `launchfile` are not running, you will get incorr
    ```
 3. The `switch` service performs the following actions (in sequence):
     1. It `kills` the current turtle
-    2. It then respawns a new turtle at `x=5.0, y=4.0`
+    2. It then respawns a new turtle at `x=5.0, y=4.0` [what is the formula?]
 4. What happens to the turtle's motion if you use `ros2 param set /mover velocity 10.0` to change `/mover velocity` to 10? `velocity stays the same`
 5. Use the Linux command `pkill mover` to kill the `/mover` node.
 6. Use the ROS command `ros2 run crazy_turtle mover --ros-args -r cmd_vel:=/turtle1/cmd_vel -p velocity:=10.0` to start the `/mover` node with a velocity of 10. 
